@@ -14,8 +14,14 @@ def load_selectors():
     return {
         "login": {
 
-            "end_button": "button.q-btn:has(span.block:has-text('Terminar'))"
-
+            # Primera etapa: Login de correo
+            "email_field": '#i0116',  # Campo de correo electrónico
+            "email_password_field": '',  # Campo de contraseña del correo
+            "submit_button": '#i0118',  # Botón "Siguiente" en el primer login
+            "login_button": '#idSIButton9',  # Botón "Iniciar sesión" (primera etapa)
+            "button_not": '#idDiv_SAOTCS_HavingTrouble',  
+            "button_call": '#idDiv_SAOTCS_Proofs > div:nth-child(5) > div > div > div.table-cell.text-left.content', 
+            "button_day": '#idChkBx_SAOTCC_TD',
             
             },   
     }

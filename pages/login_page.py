@@ -1,7 +1,7 @@
 import json
 import os
 import logging
-from utils.config import ZENDESK_USER, ZENDESK_PASSWORD, ZENDESK_URL,OUTLOOK_URL, load_selectors
+from utils.config import ZENDESK_USER, ZENDESK_PASSWORD, ZENDESK_URL, load_selectors
 from logging_pages.logging_config import setup_logging
 
 logger_server = logging.getLogger('main')
@@ -26,31 +26,21 @@ class LoginPage:
                 # Rellenar el formulario de login
                 logger_server.info("🔑 Rellenando usuario y contraseña.")
                 await self.page.fill(self.selectors["email_field"], ZENDESK_USER)
-                await self.page.fill(self.selectors["email_password_field"], ZENDESK_PASSWORD)
-
-                # Localizar y hacer clic en los botones de inicio de sesión
-                logger_server.info("✅ Localizando y presionando botones de inicio de sesión.")
-                await self.page.wait_for_selector(self.selectors["submit_button"])
                 await self.page.click(self.selectors["submit_button"])
+                await self.page.fill(self.selectors["email_password_field"], ZENDESK_PASSWORD)
                 await self.page.click(self.selectors["login_button"])
+                
+                logger_server.info("🔑 seleccionando tipo de autenticacion.")
+                await self.page.click(self.selectors["button_not"])
+                await self.page.click(self.selectors["button_call"])
+                await self.page.click(self.selectors["button_day"])
 
-                # Esperar que la página cargue completamente antes de continuar
+               # Esperar que la página cargue completamente antes de continuar
                 logger_server.info("⏳ Esperando que la red se estabilice después del inicio de sesión.")
                 await self.page.wait_for_load_state("networkidle", timeout=15000)
 
-                # Iniciar las interacciones posteriores al login
-                logger_server.info("🔄 Realizando interacciones posteriores al login.")
-
-                # Presionar el botón de cancelación de entrantes (starters_button)
-                logger_server.info("🛑 Presionando el botón de cancelación de entrantes.")
-                await self.page.click(self.selectors["starters_button"])
-
-
+                
                 logger_server.info("✅ Interacciones completadas exitosamente.")
-
-                # # **Descanso de 10 segundos para revisión**
-                # logger_server.info("⏳ Pausando 5 segundos para revisión...")
-                # await self.page.wait_for_timeout(5000)  # 5 segundos
 
                 return True
             
