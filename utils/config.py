@@ -20,7 +20,7 @@ def load_selectors():
             "email_password_field": '#i0118',  # Campo de contraseña del correo
             "submit_button": 'input#idSIButton9',  # Botón "Siguiente" en el primer login
             "login_button": '#idSIButton9',  # Botón "Iniciar sesión" (primera etapa)
-            "button_not": '#idDiv_SAOTCS_HavingTrouble',  
+            "button_not": 'a[aria-describedby="idDiv_SAOTCAS_Title idDiv_SAOTCAS_Description"]',  
             "button_call": '#idDiv_SAOTCS_Proofs > div:nth-child(5) > div > div > div.table-cell.text-left.content', 
             "button_day": '#idChkBx_SAOTCC_TD',
             

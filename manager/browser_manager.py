@@ -1,3 +1,5 @@
+import os
+import json
 from playwright.async_api import async_playwright
 
 class BrowserManager:
@@ -11,6 +13,15 @@ class BrowserManager:
         self.browser = None
         self.context = None
         self.playwright = None  # Guardar la instancia de Playwright
+        
+    async def prepare_storage_state(self):
+        """
+        Verifica y crea un archivo de estado vacío si no existe.
+        """
+        if not os.path.exists(self.storage_state_path):
+            print(f"Archivo {self.storage_state_path} no encontrado. Creando archivo vacío...")
+            with open(self.storage_state_path, 'w') as file:
+                json.dump({"cookies": [], "origins": []}, file)
 
     async def create_browser_context(self):
         """
