@@ -23,6 +23,8 @@ def load_selectors():
             "button_not": 'a[aria-describedby="idDiv_SAOTCAS_Title idDiv_SAOTCAS_Description"]',  
             "button_call": '#idDiv_SAOTCS_Proofs > div:nth-child(5) > div > div > div.table-cell.text-left.content', 
             "button_day": '#idChkBx_SAOTCC_TD',
+            "logged_button": '#idSIButton9',  # Botón de "Inicio" en la barra de navegación
+            "show_button": '#KmsiCheckboxField',  # Botón de "Mostrar contraseña"
             "welcome_message": '#ember2620 > div > nav > div.StyledBaseNavItem-sc-zvo43f-0.StyledLogoNavItem-sc-saaydx-0.gvFgbC.bdDIaV.sc-19et275-0.kpIgbf',
             
             },  

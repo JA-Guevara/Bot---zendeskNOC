@@ -95,13 +95,17 @@ class LoginPage:
                 await self.page.click(self.selectors["login_button"])
 
                 # Seleccionar tipo de autenticación
-                logger_server.info("🔑 Seleccionando tipo de autenticación.")
+                logger_server.info("🔏🔏 Seleccionando tipo de autenticación.🔏🔏")
                 await self.page.click(self.selectors["button_not"])
                 await self.page.click(self.selectors["button_call"])
                 await self.page.click(self.selectors["button_day"])
                 
                 
-                await asyncio.sleep(60)
+                await self.page.click(self.selectors["show_button"])
+                await self.page.click(self.selectors["logged_button"])
+                await asyncio.sleep(200)
+                
+                
                 
 
                 # Esperar que la página cargue completamente
