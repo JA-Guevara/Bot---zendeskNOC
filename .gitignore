@@ -1,4 +1,4 @@
 .env
 venv
-server.log
+logging
 user_data.json
