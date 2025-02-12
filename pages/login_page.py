@@ -24,10 +24,7 @@ class LoginPage:
         await self.page.reload()
 
     async def verify_cookies(self):
-        """
-        Verifica si las cookies existen y son válidas.
-        :return: True si las cookies son válidas, False en caso contrario.
-        """
+       
         cookies_exist = os.path.exists("user_data.json")
         cookies_valid = False
 
@@ -102,11 +99,14 @@ class LoginPage:
                 await self.page.click(self.selectors["button_not"])
                 await self.page.click(self.selectors["button_call"])
                 await self.page.click(self.selectors["button_day"])
+                
+                
                 await asyncio.sleep(60)
+                
 
                 # Esperar que la página cargue completamente
                 logger_server.info("⏳ Esperando que la red se estabilice después del inicio de sesión.")
-                await self.page.wait_for_load_state("networkidle", timeout=15000)
+                await self.page.wait_for_load_state("networkidle", timeout=3000)
 
                 # Guardar el estado de sesión (cookies y datos)
                 await self.save_session_state()

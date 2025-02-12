@@ -29,13 +29,15 @@ def load_selectors():
         "zendesk": {
 
             "vistas_button": '[data-test-id="views_icon"]',  # Botón de "Vistas" en la barra lateral
-            "butthon_NOCTier1": 'a[href="/agent/filters/28626979035155"] .sc-zguyi0-0 .sc-gxrqff-0',  # Vista de tickets NOC Tier 1
+            "butthon_NOCTier1": 'a[data-test-id="views_views-tree_item-view-28175453910675"] .sc-gxrqff-0.htlang',  # Vista de tickets NOC Tier 1
             "acciones_button": 'button[data-test-id="views_views-header-options-button"]',  # Botón de "Acciones" en la vista de tickets
             "exportar_button": 'li[data-test-id="views_views-header-row-option-export-as-csv"]',  # Botón de "Exportar" en la vista de tickets
             
+            }, 
+        "outlook": {
+
             
-            
-            },    
+            },      
     }
 
 def get_environment():
