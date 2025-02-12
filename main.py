@@ -9,15 +9,11 @@ setup_logging()
 logger = logging.getLogger('main')
 
 async def main():
-    """
-    Función principal que ejecuta la tarea de login.
-    """
+    
     logger.info("🚀 Iniciando el programa...")
 
-    # Crear la tarea de login (modo no headless para ver el navegador)
-    login_task = LoginTask(headless=False)
 
-    # Ejecutar la tarea
+    login_task = LoginTask(headless=False)
     await login_task.execute()
 
     logger.info("🏁 Programa finalizado.")

@@ -1,2 +1,4 @@
 .env
 venv
+server.log
+user_data.json

@@ -2,7 +2,8 @@ import asyncio
 import logging
 from manager.browser_manager import BrowserManager
 from pages.login_page import LoginPage
-from pages.zendesk_page import ZendeskPage  # Importar la clase ZendeskPage
+from pages.zendesk_page import ZendeskPage 
+from pages.outlook_page import OutlookPage
 
 logger = logging.getLogger('main')
 
@@ -42,6 +43,11 @@ class LoginTask:
                 logger.info("🚀 Iniciando tarea de Zendesk...")
                 await zendesk_page.zendesk_extraction()
                 logger.info("✅ Tarea de Zendesk completada con éxito.")
+                
+                outlook_page = OutlookPage(page)
+                logger.info("🚀📤📩 Iniciando tarea de outlook...")
+                await outlook_page.outlook_extraction()
+                logger.info("✅ Tarea de Outlook completada con éxito.")
 
             else:
                 logger.error("❌ Falló el login.")

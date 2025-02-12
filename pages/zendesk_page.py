@@ -21,7 +21,8 @@ class ZendeskPage:
             await self.page.click(self.selectors["exportar_button"])
             
             await asyncio.sleep(60)
-            
+            return True
             
         except Exception as e:
             logger_server.error(f"⚠️ Error al procesar en zendesk: {e}")
+            return False

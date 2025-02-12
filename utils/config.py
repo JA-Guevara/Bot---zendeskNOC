@@ -37,7 +37,9 @@ def load_selectors():
             
             }, 
         "outlook": {
-
+            "report_button": 'div[data-folder-name="reporte zendesk"]',  # Botón de "ReportES" 
+            "recent_button": '(//div[contains(@class, "jGG6V gDC9O")])[1]',  # Botón de para correo mas reciente
+            "buthon_descargar": 'a[href*="expirable_attachments/token"][data-auth="NotApplicable"]',  # Botón de "Exportar" en la vista de tickets
             
             },      
     }

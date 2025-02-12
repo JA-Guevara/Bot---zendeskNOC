@@ -9,13 +9,12 @@ logger_server = logging.getLogger('main')
 
 class LoginPage:
     def __init__(self, page, browser_manager=None):
-        
         self.page = page
         self.browser_manager = browser_manager
         self.selectors = load_selectors()["login"]
 
     async def clear_cache_and_cookies(self):
-        
+        """Limpia las cookies y recarga la página para simular la limpieza de la caché."""
         logger_server.info("🧹 Limpiando cookies...")
         await self.page.context.clear_cookies()  # Limpiar cookies
 
@@ -24,7 +23,7 @@ class LoginPage:
         await self.page.reload()
 
     async def verify_cookies(self):
-       
+        """Verifica si las cookies son válidas y si hay una sesión activa."""
         cookies_exist = os.path.exists("user_data.json")
         cookies_valid = False
 
@@ -43,7 +42,7 @@ class LoginPage:
                 logger_server.error(f"⚠️ Error leyendo archivo de cookies: {e}")
 
         if cookies_valid:
-            logger_server.info("✅ Cookies válidas encontradas. Sesión activa.")
+            logger_server.info("✅ Cookies válidas encontradas. Verificando sesión activa...")
             
             # Intentar cargar la página para verificar si realmente hay sesión activa
             await self.page.goto(ZENDESK_URL)
@@ -52,16 +51,18 @@ class LoginPage:
             await self.page.wait_for_load_state("networkidle")
 
             # Verificar si el usuario está autenticado
-            await asyncio.sleep(100)
-            if await self.page.locator(self.selectors["welcome_message"]).count() > 0:
+            try:
+                await self.page.wait_for_selector(self.selectors["welcome_message"], timeout=5000)
                 logger_server.info("✅ Sesión activa confirmada.")
-            else:
+                return True
+            except Exception as e:
                 logger_server.info("🔄 Las cookies no son válidas. Iniciando sesión desde cero...")
-                cookies_valid = False
+                return False
 
-        return cookies_valid
+        return False
 
     async def save_session_state(self):
+        """Guarda el estado de la sesión (cookies y datos) en un archivo JSON."""
         try:
             storage_state = await self.page.context.storage_state()
             with open("user_data.json", "w") as file:
@@ -71,7 +72,7 @@ class LoginPage:
             logger_server.error(f"⚠️ Error guardando el estado de sesión: {e}")
 
     async def stage_login(self):
-        
+        """Maneja el proceso completo de inicio de sesión."""
         logger_server.info("🚀 Iniciando etapa de login...")
         try:
             # Verificar si las cookies son válidas
@@ -95,18 +96,15 @@ class LoginPage:
                 await self.page.click(self.selectors["login_button"])
 
                 # Seleccionar tipo de autenticación
-                logger_server.info("🔏🔏 Seleccionando tipo de autenticación.🔏🔏")
+                logger_server.info("🔏 Seleccionando tipo de autenticación...")
                 await self.page.click(self.selectors["button_not"])
                 await self.page.click(self.selectors["button_call"])
                 await self.page.click(self.selectors["button_day"])
                 
+                await asyncio.sleep(30)
                 
                 await self.page.click(self.selectors["show_button"])
                 await self.page.click(self.selectors["logged_button"])
-                await asyncio.sleep(200)
-                
-                
-                
 
                 # Esperar que la página cargue completamente
                 logger_server.info("⏳ Esperando que la red se estabilice después del inicio de sesión.")
