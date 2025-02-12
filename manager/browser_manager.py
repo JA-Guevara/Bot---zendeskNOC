@@ -1,57 +1,91 @@
 import os
 import json
+import logging
 from playwright.async_api import async_playwright
+from datetime import datetime, timedelta
+
+logger = logging.getLogger('main')
 
 class BrowserManager:
-    
-
-    def __init__(self, headless: bool = False):
-        """
-        :param headless: Indica si el navegador debe ejecutarse en modo headless.
-        """
+    def __init__(self, headless=False):
         self.headless = headless
         self.browser = None
         self.context = None
-        self.playwright = None  # Guardar la instancia de Playwright
-        
+        self.playwright = None
+        self.storage_state_path = "user_data.json"  # Definir la ruta del archivo de estado
+
+    async def check_and_clear_cookies(self):
+        """Verifica y elimina las cookies si han pasado más de 48 horas."""
+        if os.path.exists(self.storage_state_path):
+            try:
+                with open(self.storage_state_path, "r") as file:
+                    storage_data = json.load(file)
+                    last_session_time = storage_data.get("last_session_time")
+
+                    if last_session_time:
+                        last_session_time = datetime.fromisoformat(last_session_time)
+                        if datetime.now() - last_session_time > timedelta(hours=48):
+                            logger.info("🕒 Han pasado más de 48 horas. Eliminando cookies...")
+                            os.remove(self.storage_state_path)
+                            await self.prepare_storage_state()  # Crear nuevo archivo vacío
+                            return True  # Indicar que las cookies fueron eliminadas
+            except Exception as e:
+                logger.error(f"⚠️ Error verificando/eliminando cookies: {e}")
+        return False  # Indicar que no se eliminaron cookies
+
     async def prepare_storage_state(self):
-        """
-        Verifica y crea un archivo de estado vacío si no existe.
-        """
+        """Crea un archivo de estado vacío si no existe."""
         if not os.path.exists(self.storage_state_path):
-            print(f"Archivo {self.storage_state_path} no encontrado. Creando archivo vacío...")
+            logger.info(f"📄 Archivo {self.storage_state_path} no encontrado. Creando archivo vacío...")
             with open(self.storage_state_path, 'w') as file:
-                json.dump({"cookies": [], "origins": []}, file)
+                json.dump({"cookies": [], "origins": [], "last_session_time": datetime.now().isoformat()}, file)
 
     async def create_browser_context(self):
-        """
-        Crea el navegador y su contexto asociado.
-        """
-        self.playwright = await async_playwright().start()
+        """Crea un nuevo contexto del navegador y carga las cookies si existen."""
+        if not self.playwright:
+            self.playwright = await async_playwright().start()
+
         self.browser = await self.playwright.chromium.launch(headless=self.headless)
 
-        # Crear un contexto vacío (sin almacenamiento de cookies ni estado)
-        self.context = await self.browser.new_context()
+        # Cargar el estado de almacenamiento si existe
+        if os.path.exists(self.storage_state_path):
+            with open(self.storage_state_path, "r") as file:
+                storage_state = json.load(file)
+                self.context = await self.browser.new_context(storage_state=storage_state)
+                logger.info("✅ Cookies cargadas desde el archivo de estado.")
+        else:
+            self.context = await self.browser.new_context()
+            logger.info("🔄 No se encontraron cookies. Creando nuevo contexto.")
+
         return self.context, self.browser
 
+    async def save_storage_state(self):
+        """Guarda el estado de almacenamiento (cookies) en el archivo."""
+        try:
+            storage_state = await self.context.storage_state()
+            storage_state["last_session_time"] = datetime.now().isoformat()
+            with open(self.storage_state_path, "w") as file:
+                json.dump(storage_state, file)
+            logger.info("✅ Estado de almacenamiento guardado correctamente.")
+        except Exception as e:
+            logger.error(f"⚠️ Error guardando el estado de almacenamiento: {e}")
+
     async def close_browser(self):
-        """
-        Cierra el navegador y su contexto asociado.
-        Si el navegador ya está cerrado, no realiza ninguna acción.
-        """
+        """Cierra el navegador y guarda las cookies antes de cerrar el contexto."""
         try:
             if self.context:
+                # Guardar el estado de almacenamiento antes de cerrar el contexto
+                await self.save_storage_state()
                 await self.context.close()
-                print("✔ Contexto cerrado correctamente.")
+                logger.info("✔ Contexto cerrado correctamente.")
 
             if self.browser:
                 await self.browser.close()
-                print("✔ Navegador cerrado correctamente.")
+                logger.info("✔ Navegador cerrado correctamente.")
 
-            # Cerrar Playwright
             if self.playwright:
                 await self.playwright.stop()
-                print("✔ Playwright detenido correctamente.")
+                logger.info("✔ Playwright detenido correctamente.")
 
         except Exception as e:
-            print(f"⚠️ Error al cerrar el navegador o contexto: {e}")
+            logger.error(f"⚠️ Error al cerrar el navegador o contexto: {e}")

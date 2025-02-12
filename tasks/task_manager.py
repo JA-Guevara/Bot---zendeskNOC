@@ -2,6 +2,8 @@ import asyncio
 import logging
 from manager.browser_manager import BrowserManager
 from pages.login_page import LoginPage
+from pages.zendesk_page import ZendeskPage 
+from pages.outlook_page import OutlookPage
 
 logger = logging.getLogger('main')
 
@@ -16,7 +18,7 @@ class LoginTask:
 
     async def execute(self):
         """
-        Ejecuta la tarea de login.
+        Ejecuta la tarea de login y luego la tarea de Zendesk.
         """
         logger.info("🚀 Iniciando tarea de login...")
 
@@ -33,11 +35,25 @@ class LoginTask:
 
             if login_success:
                 logger.info("✅ Login completado con éxito.")
+
+                # Inicializar la página de Zendesk
+                zendesk_page = ZendeskPage(page)
+
+                # Ejecutar la tarea de Zendesk
+                logger.info("🚀 Iniciando tarea de Zendesk...")
+                await zendesk_page.zendesk_extraction()
+                logger.info("✅ Tarea de Zendesk completada con éxito.")
+                
+                outlook_page = OutlookPage(page)
+                logger.info("🚀📤📩 Iniciando tarea de outlook...")
+                await outlook_page.outlook_extraction()
+                logger.info("✅ Tarea de Outlook completada con éxito.")
+
             else:
                 logger.error("❌ Falló el login.")
 
         except Exception as e:
-            logger.error(f"⚠️ Error durante la tarea de login: {e}")
+            logger.error(f"⚠️ Error durante la tarea de login o Zendesk: {e}")
 
         finally:
             # Cerrar el navegador al finalizar
