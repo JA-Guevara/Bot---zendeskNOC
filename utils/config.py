@@ -23,8 +23,19 @@ def load_selectors():
             "button_not": 'a[aria-describedby="idDiv_SAOTCAS_Title idDiv_SAOTCAS_Description"]',  
             "button_call": '#idDiv_SAOTCS_Proofs > div:nth-child(5) > div > div > div.table-cell.text-left.content', 
             "button_day": '#idChkBx_SAOTCC_TD',
+            "welcome_message": '#ember2620 > div > nav > div.StyledBaseNavItem-sc-zvo43f-0.StyledLogoNavItem-sc-saaydx-0.gvFgbC.bdDIaV.sc-19et275-0.kpIgbf',
             
-            },   
+            },  
+        "zendesk": {
+
+            "vistas_button": '[data-test-id="views_icon"]',  # Botón de "Vistas" en la barra lateral
+            "butthon_NOCTier1": 'a[href="/agent/filters/28626979035155"] .sc-zguyi0-0 .sc-gxrqff-0',  # Vista de tickets NOC Tier 1
+            "acciones_button": 'button[data-test-id="views_views-header-options-button"]',  # Botón de "Acciones" en la vista de tickets
+            "exportar_button": 'li[data-test-id="views_views-header-row-option-export-as-csv"]',  # Botón de "Exportar" en la vista de tickets
+            
+            
+            
+            },    
     }
 
 def get_environment():

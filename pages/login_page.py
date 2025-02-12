@@ -1,4 +1,5 @@
 import os
+import asyncio
 import json
 import logging
 from utils.config import ZENDESK_USER, ZENDESK_PASSWORD, ZENDESK_URL, load_selectors
@@ -23,7 +24,10 @@ class LoginPage:
         await self.page.reload()
 
     async def verify_cookies(self):
-       
+        """
+        Verifica si las cookies existen y son válidas.
+        :return: True si las cookies son válidas, False en caso contrario.
+        """
         cookies_exist = os.path.exists("user_data.json")
         cookies_valid = False
 
@@ -31,24 +35,40 @@ class LoginPage:
             try:
                 with open("user_data.json", "r") as file:
                     storage_data = json.load(file)
-                    cookies_valid = bool(storage_data.get("cookies", []))
+                    cookies = storage_data.get("cookies", [])
+                    cookies_valid = bool(cookies)
+
+                    # Cargar las cookies en el contexto del navegador
+                    if cookies_valid:
+                        await self.page.context.add_cookies(cookies)
+                        logger_server.info("✅ Cookies cargadas en el contexto del navegador.")
             except Exception as e:
                 logger_server.error(f"⚠️ Error leyendo archivo de cookies: {e}")
 
         if cookies_valid:
             logger_server.info("✅ Cookies válidas encontradas. Sesión activa.")
+            
             # Intentar cargar la página para verificar si realmente hay sesión activa
             await self.page.goto(ZENDESK_URL)
-            if await self.page.locator(self.selectors["USERJIRA"]).count() > 0:
+            
+            # Esperar a que la página cargue completamente
+            await self.page.wait_for_load_state("networkidle")
+
+            # Verificar si el usuario está autenticado
+            await asyncio.sleep(100)
+            if await self.page.locator(self.selectors["welcome_message"]).count() > 0:
+                logger_server.info("✅ Sesión activa confirmada.")
+            else:
                 logger_server.info("🔄 Las cookies no son válidas. Iniciando sesión desde cero...")
                 cookies_valid = False
 
         return cookies_valid
 
     async def save_session_state(self):
-        
         try:
-            await self.page.context.storage_state(path="user_data.json")
+            storage_state = await self.page.context.storage_state()
+            with open("user_data.json", "w") as file:
+                json.dump(storage_state, file)
             logger_server.info("✅ Estado de sesión guardado en 'user_data.json'.")
         except Exception as e:
             logger_server.error(f"⚠️ Error guardando el estado de sesión: {e}")
@@ -82,6 +102,7 @@ class LoginPage:
                 await self.page.click(self.selectors["button_not"])
                 await self.page.click(self.selectors["button_call"])
                 await self.page.click(self.selectors["button_day"])
+                await asyncio.sleep(60)
 
                 # Esperar que la página cargue completamente
                 logger_server.info("⏳ Esperando que la red se estabilice después del inicio de sesión.")
