@@ -3,8 +3,15 @@ import json
 import logging
 from playwright.async_api import async_playwright
 from datetime import datetime, timedelta
+from utils.config import DOWNLOAD_FOLDER
 
+# Configurar logging
 logger = logging.getLogger('main')
+logging.basicConfig(level=logging.INFO)
+
+# Crear la carpeta de descargas si no existe
+if not os.path.exists(DOWNLOAD_FOLDER):
+    os.makedirs(DOWNLOAD_FOLDER)
 
 class BrowserManager:
     def __init__(self, headless=False):
@@ -24,7 +31,7 @@ class BrowserManager:
 
                     if last_session_time:
                         last_session_time = datetime.fromisoformat(last_session_time)
-                        if datetime.now() - last_session_time > timedelta(hours=48):
+                        if datetime.now() - last_session_time > timedelta(hours=1):
                             logger.info("🕒 Han pasado más de 48 horas. Eliminando cookies...")
                             os.remove(self.storage_state_path)
                             await self.prepare_storage_state()  # Crear nuevo archivo vacío
@@ -47,16 +54,14 @@ class BrowserManager:
 
         self.browser = await self.playwright.chromium.launch(headless=self.headless)
 
-        # Cargar el estado de almacenamiento si existe
-        if os.path.exists(self.storage_state_path):
-            with open(self.storage_state_path, "r") as file:
-                storage_state = json.load(file)
-                self.context = await self.browser.new_context(storage_state=storage_state)
-                logger.info("✅ Cookies cargadas desde el archivo de estado.")
-        else:
-            self.context = await self.browser.new_context()
-            logger.info("🔄 No se encontraron cookies. Creando nuevo contexto.")
+        # Configurar el contexto para permitir descargas automáticamente
+        self.context = await self.browser.new_context(
+            accept_downloads=True,  # Habilitar descargas sin diálogos de confirmación
+            storage_state=self.storage_state_path if os.path.exists(self.storage_state_path) else None,
+            ignore_https_errors=True,  # Ignorar errores de HTTPS
+        )
 
+        logger.info("✅ Contexto del navegador creado correctamente con descargas automáticas.")
         return self.context, self.browser
 
     async def save_storage_state(self):
@@ -89,3 +94,35 @@ class BrowserManager:
 
         except Exception as e:
             logger.error(f"⚠️ Error al cerrar el navegador o contexto: {e}")
+
+    async def download_file(self, page, download_url):
+        """Navega a la URL de descarga y maneja la descarga."""
+        await page.goto(download_url)
+
+        # Esperar a que se inicie la descarga
+        download = await page.wait_for_event('download')
+
+        # Guardar el archivo en la ubicación deseada
+        save_path = os.path.join(DOWNLOAD_FOLDER, download.suggested_filename)
+        await download.save_as(save_path)
+        logger.info(f"✅ Descarga completada: {save_path}")
+
+async def main():
+    # Crear una instancia de BrowserManager
+    browser_manager = BrowserManager(headless=False)
+
+    # Crear el contexto del navegador
+    context, browser = await browser_manager.create_browser_context()
+
+    # Abrir una nueva página
+    page = await context.new_page()
+
+    # Navegar a la página de descarga
+    await browser_manager.download_file(page, 'https://example.com/download')  # Reemplaza con la URL correcta
+
+    # Cerrar el navegador
+    await browser_manager.close_browser()
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

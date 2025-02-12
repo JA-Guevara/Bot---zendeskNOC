@@ -20,7 +20,7 @@ class ZendeskPage:
             await self.page.click(self.selectors["acciones_button"])
             await self.page.click(self.selectors["exportar_button"])
             
-            await asyncio.sleep(60)
+            
             return True
             
         except Exception as e:

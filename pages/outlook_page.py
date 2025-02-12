@@ -20,10 +20,18 @@ class OutlookPage:
             
             await self.page.click(self.selectors["report_button"])
             await self.page.click(self.selectors["recent_button"])
-            await self.page.click(self.selectors["buthon_descargar"])
             
+            #await self.page.click(self.selectors["button_descargar"])
             
+            download_url = await self.page.get_attribute(self.selectors["button_descargar"], "href")
+            if not download_url:
+                raise ValueError("No se pudo obtener el enlace de descarga.")
             
+            logger_server.info(f"🔗 Enlace de descarga obtenido: {download_url}")
+
+            
+            return download_url
+        
             
         except Exception as e:
             logger_server.error(f"⚠️ Error al procesar en outlook: {e}")

@@ -7,7 +7,9 @@ load_dotenv()
 ZENDESK_USER=  os.getenv("ZENDESK_USER") 
 ZENDESK_PASSWORD=  os.getenv("ZENDESK_PASSWORD") 
 ZENDESK_URL=  os.getenv("ZENDESK_URL") 
-OUTLOOK_URL=  os.getenv("OUTLOOK_URL")
+OUTLOOK_URL=  os.getenv("OUTLOOK_URL")  
+EXCEL_URL=  os.getenv("EXCEL_URL")
+DOWNLOAD_FOLDER=  os.getenv("download_folder")
 
 
 def load_selectors():
@@ -39,7 +41,7 @@ def load_selectors():
         "outlook": {
             "report_button": 'div[data-folder-name="reporte zendesk"]',  # Botón de "ReportES" 
             "recent_button": '(//div[contains(@class, "jGG6V gDC9O")])[1]',  # Botón de para correo mas reciente
-            "buthon_descargar": 'a[href*="expirable_attachments/token"][data-auth="NotApplicable"]',  # Botón de "Exportar" en la vista de tickets
+            "button_descargar": 'a[href*="expirable_attachments/token"][data-auth="NotApplicable"]',  # Botón de "Exportar" en la vista de tickets
             
             },      
     }
